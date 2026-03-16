@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="description" content="20-20-20 Eye Care Rule Monitor">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>20·20·20 Eye Care</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;1,9..144,200&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #050810;
+    --surface: #0d1220;
+    --surface2: #141926;
+    --border: rgba(100,180,255,0.12);
+    --accent: #4ab8ff;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --text: #e8f0ff;
+    --text-muted: #6b7fa3;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --glow: 0 0 40px rgba(74,184,255,0.15);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(74,184,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(167,139,250,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-top: 8px;
+  }
+
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    font-weight: 200;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* Main timer ring */
+  .timer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--glow);
+  }
+
+  .timer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
+  .ring-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 24px;
+  }
+
+  .ring-svg {
+    width: 200px;
+    height: 200px;
+    transform: rotate(-90deg);
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.05);
+    stroke-width: 6;
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 534;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+
+  .ring-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .timer-display {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .timer-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .phase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,184,255,0.1);
+    border: 1px solid rgba(74,184,255,0.2);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .phase-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #050810;
+    font-weight: 500;
+    flex: 1;
+    box-shadow: 0 4px 20px rgba(74,184,255,0.25);
+  }
+
+  .btn-primary:hover {
+    background: #6fcfff;
+    box-shadow: 0 4px 30px rgba(74,184,255,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    border-color: rgba(100,180,255,0.25);
+  }
+
+  .btn-danger {
+    background: rgba(248,113,113,0.1);
+    color: var(--danger);
+    border: 1px solid rgba(248,113,113,0.2);
+  }
+
+  .btn-danger:hover {
+    background: rgba(248,113,113,0.18);
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 200;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Settings card */
+  .settings-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .settings-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    opacity: 0.8;
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .setting-row:last-child { border-bottom: none; }
+
+  .setting-info { flex: 1; }
+
+  .setting-name {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .setting-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; top: 3px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .toggle input:checked + .toggle-slider {
+    background: rgba(74,184,255,0.2);
+    border-color: var(--accent);
+  }
+
+  .toggle input:checked + .toggle-slider::after {
+    transform: translateX(20px);
+    background: var(--accent);
+  }
+
+  /* Volume / interval sliders */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .slider-row:last-child { border-bottom: none; }
+
+  .slider-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .slider-value {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 200;
+    color: var(--accent);
+    width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--border);
+    border-radius: 100px;
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(74,184,255,0.4);
+  }
+
+  /* Break overlay */
+  .break-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,16,0.97);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  .break-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .break-eye {
+    font-size: 80px;
+    animation: blink 3s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 45%, 55%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+  }
+
+  .break-title {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-weight: 200;
+    color: var(--accent3);
+    text-align: center;
+    letter-spacing: -0.02em;
+  }
+
+  .break-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.7;
+    letter-spacing: 0.05em;
+  }
+
+  .break-countdown {
+    font-family: 'Fraunces', serif;
+    font-size: 80px;
+    font-weight: 200;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .break-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    border: 1px solid rgba(52,211,153,0.08);
+    animation: expand 3s ease-in-out infinite;
+  }
+
+  .break-ring:nth-child(2) { animation-delay: 1s; }
+  .break-ring:nth-child(3) { animation-delay: 2s; }
+
+  @keyframes expand {
+    0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.3; }
+    100% { transform: translate(-50%,-50%) scale(1.3); opacity: 0; }
+  }
+
+  .btn-skip-break {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 100px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-skip-break:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    z-index: 200;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* History */
+  .history-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+  }
+
+  .history-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    font-size: 11px;
+  }
+
+  .history-time { color: var(--text-muted); }
+  .history-badge {
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .badge-work { background: rgba(74,184,255,0.1); color: var(--accent); }
+  .badge-break { background: rgba(52,211,153,0.1); color: var(--accent3); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+
+  /* Notification perm banner */
+  .perm-banner {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .perm-text {
+    font-size: 11px;
+    color: var(--warn);
+    letter-spacing: 0.03em;
+  }
+
+  .btn-allow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.3);
+    color: var(--warn);
+    border-radius: 100px;
+    padding: 6px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .btn-allow:hover { background: rgba(251,191,36,0.25); }
+
+  .hidden { display: none !important; }
+
+  /* Active state glow for running */
+  .timer-card.running .ring-progress {
+    stroke: var(--accent);
+  }
+
+  /* Break phase ring color */
+  .timer-card.break-phase .ring-progress {
+    stroke: var(--accent3);
+    filter: drop-shadow(0 0 6px var(--accent3));
+  }
+
+  /* PWA install hint */
+  .install-hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-top: 24px;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 360px) {
+    .timer-display { font-size: 44px; }
+    .header h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="break-overlay" id="breakOverlay">
+  <div class="break-ring"></div>
+  <div class="break-ring"></div>
+  <div class="break-ring"></div>
+  <div class="break-eye">👁</div>
+  <div class="break-title">Look Away</div>
+  <div class="break-subtitle">
+    Focus on something<br>20 feet away<br>for 20 seconds
+  </div>
+  <div class="break-countdown" id="breakCountdown">20</div>
+  <button class="btn-skip-break" onclick="skipBreak()">Skip break →</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-eyebrow">Eye Care Protocol</div>
+    <h1>20·20·20</h1>
+    <p>Every 20 minutes, look at something<br>20 feet away for 20 seconds</p>
+  </div>
+
+  <div id="notifBanner" class="perm-banner hidden">
+    <span class="perm-text">⚠ Enable notifications for display alerts</span>
+    <button class="btn-allow" onclick="requestNotifPerm()">Allow</button>
+  </div>
+
+  <div class="timer-card" id="timerCard">
+    <div class="ring-container">
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="ring-track" cx="100" cy="100" r="85"/>
+        <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="85"/>
+      </svg>
+      <div class="ring-center">
+        <div class="timer-display" id="timerDisplay">20:00</div>
+        <div class="timer-label" id="timerLabel">until break</div>
+      </div>
+    </div>
+
+    <div class="phase-badge">
+      <div class="phase-dot" id="phaseDot"></div>
+      <span id="phaseText">Ready to start</span>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="mainBtn" onclick="toggleTimer()">Start</button>
+      <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="statSessions">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statBreaks">0</div>
+      <div class="stat-label">Breaks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statStreak">0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-title">Alert Settings</div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">🔊 Sound alert</div>
+        <div class="setting-desc">Chime when break starts & ends</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="soundToggle" checked onchange="saveSettings()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">📳 Vibration</div>
+        <div class="setting-desc">Haptic pulse (mobile)</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="vibrateToggle" checked onchange="saveSettings()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">🖥 Display overlay</div>
+        <div class="setting-desc">Full-screen break reminder</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="overlayToggle" checked onchange="saveSettings()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-info">
+        <div class="setting-name">🔔 Notification</div>
+        <div class="setting-desc">System notification alert</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="notifToggle" onchange="toggleNotif()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="slider-row">
+      <span class="slider-label">Work time</span>
+      <input type="range" id="workSlider" min="1" max="60" value="20" oninput="updateWorkTime(this.value)">
+      <span class="slider-value" id="workVal">20m</span>
+    </div>
+
+    <div class="slider-row">
+      <span class="slider-label">Volume</span>
+      <input type="range" id="volSlider" min="0" max="100" value="70" oninput="updateVolume(this.value)">
+      <span class="slider-value" id="volVal">70</span>
+    </div>
+  </div>
+
+  <div class="history-card">
+    <div class="history-title">Session Log</div>
+    <div class="history-list" id="historyList">
+      <div style="font-size:11px;color:var(--text-muted);text-align:center;padding:16px 0;">No sessions yet</div>
+    </div>
+  </div>
+
+  <div class="install-hint">Add to home screen for the full PWA experience</div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+let timer = null;
+let secondsLeft = 20 * 60;
+let workSeconds = 20 * 60;
+let isRunning = false;
+let isBreak = false;
+let breakSecondsLeft = 20;
+let breakTimer = null;
+let sessions = 0;
+let breaks = 0;
+let streak = 0;
+let lastBreakDate = null;
+let volume = 0.7;
+let history = [];
+let audioCtx = null;
+
+const CIRCUMFERENCE = 2 * Math.PI * 85; // 534.07
+
+// ── Init ───────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadSettings();
+  loadStats();
+  updateDisplay();
+  checkNotifPerm();
+  registerSW();
+});
+
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    const sw = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('fetch', e => {});
+    `;
+    const blob = new Blob([sw], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+  }
+}
+
+// ── Timer logic ────────────────────────────────────────────────────────
+function toggleTimer() {
+  if (isRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  isRunning = true;
+  document.getElementById('mainBtn').textContent = 'Pause';
+  document.getElementById('phaseText').textContent = isBreak ? 'Break time' : 'Work session';
+  document.getElementById('timerCard').classList.add('running');
+  if (isBreak) document.getElementById('timerCard').classList.add('break-phase');
+
+  timer = setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      clearInterval(timer);
+      isRunning = false;
+      if (!isBreak) {
+        onWorkEnd();
+      } else {
+        onBreakEnd();
+      }
+    }
+    updateDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  isRunning = false;
+  clearInterval(timer);
+  document.getElementById('mainBtn').textContent = 'Resume';
+  document.getElementById('phaseText').textContent = 'Paused';
+}
+
+function resetTimer() {
+  clearInterval(timer);
+  clearInterval(breakTimer);
+  isRunning = false;
+  isBreak = false;
+  secondsLeft = workSeconds;
+  document.getElementById('mainBtn').textContent = 'Start';
+  document.getElementById('phaseText').textContent = 'Ready to start';
+  document.getElementById('timerCard').classList.remove('running', 'break-phase');
+  document.getElementById('breakOverlay').classList.remove('active');
+  updateDisplay();
+}
+
+function onWorkEnd() {
+  sessions++;
+  addHistory('work');
+  updateStats();
+  saveStats();
+  triggerAlert('break');
+  isBreak = true;
+  secondsLeft = workSeconds;
+  document.getElementById('timerCard').classList.add('break-phase');
+
+  if (document.getElementById('overlayToggle').checked) {
+    showBreakOverlay();
+  } else {
+    // Auto-resume working after 20s even without overlay
+    setTimeout(() => {
+      onBreakEnd();
+    }, 20000);
+  }
+}
+
+function onBreakEnd() {
+  breaks++;
+  streak++;
+  addHistory('break');
+  updateStats();
+  saveStats();
+  triggerAlert('resume');
+  isBreak = false;
+  secondsLeft = workSeconds;
+  document.getElementById('timerCard').classList.remove('break-phase');
+  document.getElementById('phaseText').textContent = 'Work session';
+  document.getElementById('breakOverlay').classList.remove('active');
+  clearInterval(breakTimer);
+  // Auto-restart work session
+  startTimer();
+}
+
+// ── Break overlay ──────────────────────────────────────────────────────
+function showBreakOverlay() {
+  const overlay = document.getElementById('breakOverlay');
+  overlay.classList.add('active');
+  breakSecondsLeft = 20;
+  document.getElementById('breakCountdown').textContent = breakSecondsLeft;
+
+  clearInterval(breakTimer);
+  breakTimer = setInterval(() => {
+    breakSecondsLeft--;
+    document.getElementById('breakCountdown').textContent = breakSecondsLeft;
+    if (breakSecondsLeft <= 0) {
+      clearInterval(breakTimer);
+      onBreakEnd();
+    }
+  }, 1000);
+}
+
+function skipBreak() {
+  clearInterval(breakTimer);
+  onBreakEnd();
+}
+
+// ── Display ────────────────────────────────────────────────────────────
+function updateDisplay() {
+  const mins = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+  const secs = (secondsLeft % 60).toString().padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
+  document.getElementById('timerLabel').textContent = isBreak ? 'break time' : 'until break';
+
+  // Ring progress
+  const total = isBreak ? 20 : workSeconds;
+  const progress = secondsLeft / total;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  document.getElementById('ringProgress').style.strokeDashoffset = offset;
+}
+
+function updateStats() {
+  document.getElementById('statSessions').textContent = sessions;
+  document.getElementById('statBreaks').textContent = breaks;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────────
+function triggerAlert(type) {
+  if (document.getElementById('soundToggle').checked) {
+    playChime(type);
+  }
+  if (document.getElementById('vibrateToggle').checked && navigator.vibrate) {
+    if (type === 'break') {
+      navigator.vibrate([200, 100, 200, 100, 400]);
+    } else {
+      navigator.vibrate([100, 50, 100]);
+    }
+  }
+  if (document.getElementById('notifToggle').checked && Notification.permission === 'granted') {
+    const msg = type === 'break'
+      ? { title: '👁 Eye break!', body: 'Look 20 feet away for 20 seconds.' }
+      : { title: '✅ Break over', body: 'Great job! Back to work.' };
+    new Notification(msg.title, { body: msg.body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">👁</text></svg>' });
+  }
+}
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playChime(type) {
+  try {
+    const ctx = getAudioCtx();
+    const vol = volume;
+
+    if (type === 'break') {
+      // Descending pleasant chime
+      [[523, 0], [392, 0.18], [330, 0.36]].forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol * 0.4, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+        osc.start(t);
+        osc.stop(t + 0.65);
+      });
+    } else {
+      // Ascending pleasant chime
+      [[330, 0], [392, 0.15], [523, 0.3], [659, 0.45]].forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(vol * 0.4, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+        osc.start(t);
+        osc.stop(t + 0.55);
+      });
+    }
+  } catch(e) { console.warn('Audio error', e); }
+}
+
+// ── Settings ───────────────────────────────────────────────────────────
+function updateWorkTime(val) {
+  workSeconds = parseInt(val) * 60;
+  document.getElementById('workVal').textContent = `${val}m`;
+  if (!isRunning) {
+    secondsLeft = workSeconds;
+    updateDisplay();
+  }
+  saveSettings();
+}
+
+function updateVolume(val) {
+  volume = parseInt(val) / 100;
+  document.getElementById('volVal').textContent = val;
+  saveSettings();
+}
+
+function toggleNotif() {
+  if (document.getElementById('notifToggle').checked) {
+    requestNotifPerm();
+  }
+  saveSettings();
+}
+
+function checkNotifPerm() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    document.getElementById('notifBanner').classList.remove('hidden');
+  }
+  if (Notification.permission === 'granted') {
+    document.getElementById('notifToggle').checked = true;
+    document.getElementById('notifBanner').classList.add('hidden');
+  }
+}
+
+function requestNotifPerm() {
+  Notification.requestPermission().then(p => {
+    if (p === 'granted') {
+      document.getElementById('notifToggle').checked = true;
+      document.getElementById('notifBanner').classList.add('hidden');
+      showToast('Notifications enabled ✓');
+    } else {
+      document.getElementById('notifToggle').checked = false;
+      showToast('Notifications blocked');
+    }
+    saveSettings();
+  });
+}
+
+function saveSettings() {
+  const s = {
+    sound: document.getElementById('soundToggle').checked,
+    vibrate: document.getElementById('vibrateToggle').checked,
+    overlay: document.getElementById('overlayToggle').checked,
+    notif: document.getElementById('notifToggle').checked,
+    workMins: parseInt(document.getElementById('workSlider').value),
+    vol: parseInt(document.getElementById('volSlider').value),
+  };
+  localStorage.setItem('20_settings', JSON.stringify(s));
+}
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('20_settings') || '{}');
+    if (s.sound !== undefined) document.getElementById('soundToggle').checked = s.sound;
+    if (s.vibrate !== undefined) document.getElementById('vibrateToggle').checked = s.vibrate;
+    if (s.overlay !== undefined) document.getElementById('overlayToggle').checked = s.overlay;
+    if (s.workMins) {
+      document.getElementById('workSlider').value = s.workMins;
+      document.getElementById('workVal').textContent = `${s.workMins}m`;
+      workSeconds = s.workMins * 60;
+      secondsLeft = workSeconds;
+    }
+    if (s.vol !== undefined) {
+      document.getElementById('volSlider').value = s.vol;
+      document.getElementById('volVal').textContent = s.vol;
+      volume = s.vol / 100;
+    }
+  } catch(e) {}
+}
+
+function saveStats() {
+  localStorage.setItem('20_stats', JSON.stringify({ sessions, breaks, streak, history: history.slice(-20) }));
+}
+
+function loadStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem('20_stats') || '{}');
+    sessions = s.sessions || 0;
+    breaks = s.breaks || 0;
+    streak = s.streak || 0;
+    history = s.history || [];
+    updateStats();
+    renderHistory();
+  } catch(e) {}
+}
+
+// ── History ────────────────────────────────────────────────────────────
+function addHistory(type) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  history.unshift({ type, time: timeStr });
+  if (history.length > 30) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:16px 0;">No sessions yet</div>';
+    return;
+  }
+  list.innerHTML = history.slice(0, 10).map(h => `
+    <div class="history-item">
+      <span class="history-time">${h.time}</span>
+      <span class="history-badge badge-${h.type === 'work' ? 'work' : 'break'}">
+        ${h.type === 'work' ? 'Work done' : 'Break taken'}
+      </span>
+    </div>
+  `).join('');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Keyboard shortcut ──────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && e.target === document.body) {
+    e.preventDefault();
+    toggleTimer();
+  }
+  if (e.code === 'KeyR' && e.target === document.body) {
+    resetTimer();
+  }
+});
+
+// ── Visibility API: pause when tab hidden ─────────────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isRunning) {
+    // keep running in background — Web Audio and setInterval continue
+  }
+});
+
+// Unlock audio context on first user interaction
+document.addEventListener('click', () => {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } else if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}, { once: false });
+</script>
+
+<!-- PWA Manifest inline -->
+<script>
+(function() {
+  const manifest = {
+    name: "20·20·20 Eye Care",
+    short_name: "20·20·20",
+    description: "Eye care break timer",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#050810",
+    theme_color: "#0a0f1e",
+    icons: [{
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d1220'/><text y='65' x='50' text-anchor='middle' font-size='55' font-family='serif'>👁</text></svg>",
+      sizes: "any",
+      type: "image/svg+xml"
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = url;
+  document.head.appendChild(link);
+})();
+</script>
+
+</body>
+</html>
